@@ -1,6 +1,8 @@
 <style lang="scss">
-  //  @import './src/scss/style.scss';
+   @import './src/scss/reset.scss';
+   @import './src/scss/style.scss';
 </style>
+
 
 <template>
   <div id="app">

@@ -1,52 +1,66 @@
 <template>
-    <ul>
-      <li v-for="(urls, index) in url" v-bind:key="urls" @click="selectedIssue(urls)">
+    <ul class="list">
+      <li v-for="(urls, index) in url" :key="urls" @click="selectedIssue(urls)">
         {{ urls.locked }}
-        <!-- <a v-bind:href="urls.url"> -->
-          {{ urls.title }}
-        <!-- </a> -->
+        <strong>{{ urls.title }}</strong>
 
-        <span v-for="labels in urls.labels" v-bind:key="labels">
-          <!-- <a v-bind:href="urls.url"> -->
-            {{ labels.name }}
-          <!-- </a> -->
+        <span v-for="labels in urls.labels" :style="{backgroundColor: '#' + labels.color}" :key="labels">
+          {{ labels.name }}
         </span>
 
         <small>
-          #{{ urls.number }} opened {{ urls.created_at }} by {{ urls.user.login }}
+          #{{ urls.number }} opened {{ urls.created_at | moment("from", "now") }} by {{ urls.user.login }}
         </small>
-
-        <!-- <img v-bind:src="urls.user.avatar_url"/> -->
       </li>
 
-      <li>
+      <li v-if="appearDetailIssue" class="list__details">
+        <h4 class="title">Details of Issue {{this.showIssue.number}}</h4>
+
         <p>
-          {{this.showIssue.number}} <span>{{this.showIssue.title}} {{this.showIssue.body}}</span>
+          <strong>{{this.showIssue.title}}</strong> <br><br>
+          {{this.showIssue.body}} <br><br>
         </p>
 
-        <form>
-          <input v-model="issueE.name" type="text">
-          <!-- <input v-bind:value="this.showIssue.labels.name" type="text"> -->
-          <textarea v-model="issueE.description" ></textarea>
+        <h3 @click="appearEditIssue">{{ editIcon }} Edit a New Issue</h3> <br>
+
+        <form v-if="editIssueForm">
+          <label for="Title">Title</label>
+          <input v-model="issueE.name" name="Title" type="text" placeholder="Type here your title...">
+
+          <label for="Labels">Labels</label>
+          <input v-model="issueE.label.name" name="Label" type="text" placeholder="Type here your label...">
+
+          <label for="Description">Description</label>
+          <textarea v-model="issueE.description" name="Description"></textarea>
+
           <input type="hidden" v-model="this.showIssue.number" />
 
-          <button @click="unlockIssue">Unlock Issue</button>
+          <button v-if="this.showIssue.locked === true" @click="unlockIssue" class="btn-unlock">Unlock Issue</button>
 
-          <button @click="lockIssue">Lock Issue</button>
+          <button v-else @click="lockIssue" class="btn-lock">Lock Issue</button>
 
           <button @click="editIssue">Edit Issue</button>
         </form>
       </li>
+
     </ul>
 </template>
 
 <script>
+const urlAPI = 'https://api.github.com/repos/giovanapereira/github-issues-gc/issues';
+const headersAPI = '"Content-Type": "application/json; charset=utf-8", "Authorization": "token ec8d2e458e70d4dd3830f4d611d7ae544a017714"';
+
+// Vue.use(require('vue-moment'));
+
 export default {
   name: 'MeowIssue',
   data () {
     return {
       url: [],
       showIssue: {},
+      appearDetailIssue: false,
+      editIssueForm: false,
+      editIcon: '+',
       issueE: {
         number: "",
         name: "",
@@ -56,7 +70,7 @@ export default {
     }
   },
   created() {
-    fetch("https://api.github.com/repos/giovanapereira/github-issues-gc/issues")
+    fetch(urlAPI)
     .then(response => response.json())
     .then(json => {
       this.url = json
@@ -65,12 +79,21 @@ export default {
   methods: {
     selectedIssue(issue) {
       this.showIssue = issue;
+      this.appearDetailIssue = !this.appearDetailIssue
+    },
+    appearEditIssue: function () {
+      this.editIcon = '+'
+      this.editIssueForm = !this.editIssueForm
+
+      if (this.editIssueForm === true) {
+          this.editIcon = '-'
+      }
     },
     editIssue() {
       const number = this.showIssue.number;
       
-      fetch('https://api.github.com/repos/giovanapereira/github-issues-gc/issues/'+ number, {
-        headers: { "Content-Type": "application/json; charset=utf-8", "Authorization": "token ec8d2e458e70d4dd3830f4d611d7ae544a017714" },
+      fetch(urlAPI + number, {
+        headers: { headersAPI },
         method: 'PATCH',
         body: JSON.stringify({
           title: this.issueE.name,
@@ -86,8 +109,8 @@ export default {
     lockIssue() {
       const number = this.showIssue.number;
 
-      fetch('https://api.github.com/repos/giovanapereira/github-issues-gc/issues/'+ number +'/lock', {
-        headers: { "Content-Type": "application/json; charset=utf-8", "Authorization": "token ec8d2e458e70d4dd3830f4d611d7ae544a017714" },
+      fetch(urlAPI + number +'/lock', {
+        headers: { headersAPI },
         method: 'PUT',
         body: JSON.stringify({
           locked: true,
@@ -100,8 +123,8 @@ export default {
     unlockIssue() {
       const number = this.showIssue.number;
 
-      fetch('https://api.github.com/repos/giovanapereira/github-issues-gc/issues/'+ number +'/lock', {
-        headers: { "Content-Type": "application/json; charset=utf-8", "Authorization": "token ec8d2e458e70d4dd3830f4d611d7ae544a017714" },
+      fetch(urlAPI + number +'/lock', {
+        headers: { headersAPI },
         method: 'DELETE'
       })
       .then((res)=> console.log(res.body))

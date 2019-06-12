@@ -1,3 +1,165 @@
-.header {
-    background-color: black;
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+$main-color: #24292e;
+$second-color: #0366d6;
+$third-color: #CECECE;
+$text-color-light: #FFFFFF;
+$text-color-dark: #333333;
+$text-color-dark-2: #747474;
+$input-color: #CECECECE;
+$font-family: 'Poppins', sans-serif;
+
+@mixin btn($bg-color: $second-color) {
+    border: 0;
+    box-shadow: none;
+    background: $bg-color;
+    padding: 10px;
+    border-radius: 4px;
+    color: $text-color-light;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+@mixin title() {
+    font-size: 18px;
+    color: $second-color;
+    display: block;
+    margin-bottom: 10px;
+}
+
+body {
+    font-family: $font-family;
+}
+
+// GENERAL STYLE
+.header,
+.footer {
+    background-color: $main-color;
+    color: $text-color-light;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 16px;
+    z-index: 32;
+    text-align: center;
+
+    img {
+        max-width: 100%;
+    }
+}
+
+// FORM
+input,
+textarea,
+select {
+    border-radius: 3px;
+    width: 100%;
+    display: block;
+    box-shadow: none;
+    border: 1px solid $input-color;
+    margin: 5px 0;
+    height: 15px;
+    color: $text-color-dark;
+    padding: 5px;
+}
+
+textarea {
+    height: auto;
+}
+
+label {
+    font-size: 12px;
+    color: $text-color-dark;
+    font-weight: 600;
+}
+
+button {
+    @include btn;
+}
+
+.btn-unlock {
+    @include btn($third-color);
+    color: $text-color-dark;
+}
+
+.btn-lock {
+    @include btn($third-color);
+    color: $text-color-dark;
+}
+
+.title {
+    @include title();
+}
+
+// APP
+#app {
+    max-width: 1290px;
+    width: 90%;
+    margin: 50px auto;
+}
+
+// CREATE ISSUE
+.create {
+    h3 {
+        @include title();
+    }
+
+    &__form-collum {
+        display: inline-block;
+        vertical-align: top;
+        width: 49%;
+        padding: 0 5px;
+        box-sizing: border-box;
+
+        &.full {
+            width: 100%;
+        }
+    }
+}
+
+// LIST ISSUE
+.list {
+    background-color: $text-color-light;
+    border: 1px solid $third-color;
+    border-radius: 3px;
+
+    li {
+        padding: 10px 10px 10px 25px;
+        border-bottom: 1px solid $third-color;
+        color: $text-color-dark-2;
+        font-size: 12px;
+
+        &:hover {
+            background-color: $third-color;
+        }
+
+        &:last-child {
+            border: none;
+        }
+
+        strong {
+            font-size: 14px;
+            color: $text-color-dark;
+        }
+
+        span {
+            border-radius: 2px;
+            font-size: 10px;
+            height: 20px;
+            line-height: 15px;
+            padding: .15em 4px;
+            color: $text-color-light;
+            margin: 0 2px;
+        }
+
+        small {
+            display: block;
+            margin-top: 5px;
+        }
+
+        &.list__details {
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
 }
