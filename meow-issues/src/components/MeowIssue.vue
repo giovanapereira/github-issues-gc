@@ -1,7 +1,9 @@
 <template>
     <ul class="list">
       <li v-for="(urls, index) in url" :key="urls" @click="selectedIssue(urls)">
-        {{ urls.locked }}
+        <em v-if="urls.locked === true">Open</em>
+        <em v-else>Closed</em>
+        
         <strong>{{ urls.title }}</strong>
 
         <span v-for="labels in urls.labels" :style="{backgroundColor: '#' + labels.color}" :key="labels">
@@ -48,9 +50,7 @@
 
 <script>
 const urlAPI = 'https://api.github.com/repos/giovanapereira/github-issues-gc/issues';
-const headersAPI = '"Content-Type": "application/json; charset=utf-8", "Authorization": "token ec8d2e458e70d4dd3830f4d611d7ae544a017714"';
-
-// Vue.use(require('vue-moment'));
+const headersAPI = '"Content-Type": "application/json; charset=utf-8", "Authorization": "token  3e95cd3edd37b166d3d4c1f92d1e77757c54af18"';
 
 export default {
   name: 'MeowIssue',
