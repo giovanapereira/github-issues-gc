@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import { urlAPI, headersAPI } from './components/Variables'
 import MeowCreateIssue from './components/MeowCreateIssue'
 import MeowIssue from './components/MeowIssue'
 

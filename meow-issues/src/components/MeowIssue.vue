@@ -1,8 +1,8 @@
 <template>
     <ul class="list">
       <li v-for="(urls, index) in url" :key="urls" @click="selectedIssue(urls)">
-        <em v-if="urls.locked === true">Open</em>
-        <em v-else>Closed</em>
+        <em v-if="urls.locked === true">Closed</em>
+        <em v-else>Open</em>
         
         <strong>{{ urls.title }}</strong>
 
@@ -11,7 +11,7 @@
         </span>
 
         <small>
-          #{{ urls.number }} opened {{ urls.created_at | moment("from", "now") }} by {{ urls.user.login }}
+          #{{ urls.number }} opened {{ getDate(urls.created_at) }} by {{ urls.user.login }}
         </small>
       </li>
 
@@ -25,32 +25,50 @@
 
         <h3 @click="appearEditIssue">{{ editIcon }} Edit a New Issue</h3> <br>
 
-        <form v-if="editIssueForm">
-          <label for="Title">Title</label>
-          <input v-model="issueE.name" name="Title" type="text" placeholder="Type here your title...">
+        <form v-if="editIssueForm" v-on:submit.prevent="editIssue" class="create__form">
+          <div class="create__form-collum">
+            <label for="Title">Title</label>
+            <input v-model="issueE.name" name="Title" type="text">
+          </div>
 
-          <label for="Labels">Labels</label>
-          <input v-model="issueE.label.name" name="Label" type="text" placeholder="Type here your label...">
-
-          <label for="Description">Description</label>
-          <textarea v-model="issueE.description" name="Description"></textarea>
+          <div class="create__form-collum full">
+            <label for="Description">Description</label>
+            <textarea v-model="issueE.description" name="Description"></textarea>
+          </div>
 
           <input type="hidden" v-model="this.showIssue.number" />
-
-          <button v-if="this.showIssue.locked === true" @click="unlockIssue" class="btn-unlock">Unlock Issue</button>
-
-          <button v-else @click="lockIssue" class="btn-lock">Lock Issue</button>
-
-          <button @click="editIssue">Edit Issue</button>
+          <button>Edit Issue</button>
         </form>
-      </li>
 
+        <button v-if="this.showIssue.locked === true" @click="unlockIssue" class="btn-unlock">Unlock Issue</button>
+
+        <div v-else>
+          <label for="">Encerrar?</label> <br><br>
+
+          <div class="create__form-collum">
+            <label for="">Motivo</label>
+            <select v-if="this.showIssue.locked === false" v-model="issueE.lockReason">
+              <option>off-topic</option>
+              <option>too heated</option>
+              <option>spam</option>
+              <option>resolved</option>
+            </select>
+          </div>
+
+          <div class="create__form-collum">
+            <br>
+            <button @click="lockIssue" class="btn-lock">Lock Issue</button>
+          </div>
+        </div>
+      </li>
     </ul>
 </template>
 
 <script>
+import moment from 'moment'
+
 const urlAPI = 'https://api.github.com/repos/giovanapereira/github-issues-gc/issues';
-const headersAPI = '"Content-Type": "application/json; charset=utf-8", "Authorization": "token  3e95cd3edd37b166d3d4c1f92d1e77757c54af18"';
+const headersAPI = { "Content-Type": "application/json; charset=utf-8", "Authorization": "token 1adb4ef21ff9b95afdfe26e73f3c1fb287bc2dea" };
 
 export default {
   name: 'MeowIssue',
@@ -64,8 +82,8 @@ export default {
       issueE: {
         number: "",
         name: "",
-        label: "",
-        description: ""
+        description: "",
+        lockReason: ""
       }
     }
   },
@@ -77,8 +95,18 @@ export default {
     })
   },
   methods: {
+    getDate : function (date) {
+      return moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY');
+    },
     selectedIssue(issue) {
       this.showIssue = issue;
+
+      this.issueE = {
+        number: issue.number,
+        name: issue.title,
+        description: issue.body
+      };
+      
       this.appearDetailIssue = !this.appearDetailIssue
     },
     appearEditIssue: function () {
@@ -89,42 +117,34 @@ export default {
           this.editIcon = '-'
       }
     },
-    editIssue() {
-      const number = this.showIssue.number;
-      
-      fetch(urlAPI + number, {
-        headers: { headersAPI },
+    editIssue() {      
+      fetch(urlAPI + '/' + this.showIssue.number, {
+        headers: headersAPI,
         method: 'PATCH',
         body: JSON.stringify({
           title: this.issueE.name,
-          body: this.issueE.description,
-          // labels: [
-          //     this.issue.label
-          // ]
+          body: this.issueE.description
         })
       })
       .then((res)=> console.log(res.body))
       .catch((error)=> console.log(error))
     },
     lockIssue() {
-      const number = this.showIssue.number;
 
-      fetch(urlAPI + number +'/lock', {
-        headers: { headersAPI },
+      fetch(urlAPI + '/' + this.showIssue.number +'/lock', {
+        headers: headersAPI,
         method: 'PUT',
         body: JSON.stringify({
           locked: true,
-          active_lock_reason: "too heated"
+          active_lock_reason: this.issueE.lockReason
         })
       })
       .then((res)=> console.log(res.body))
       .catch((error)=> console.log(error))
     },
     unlockIssue() {
-      const number = this.showIssue.number;
-
-      fetch(urlAPI + number +'/lock', {
-        headers: { headersAPI },
+      fetch(urlAPI + '/' + this.showIssue.number +'/lock', {
+        headers: headersAPI,
         method: 'DELETE'
       })
       .then((res)=> console.log(res.body))

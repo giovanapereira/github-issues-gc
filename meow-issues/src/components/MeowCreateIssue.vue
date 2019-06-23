@@ -24,9 +24,6 @@
 </template>
 
 <script>
-const urlAPI = 'https://api.github.com/repos/giovanapereira/github-issues-gc/issues';
-const headersAPI = '"Content-Type": "application/json; charset=utf-8", "Authorization": "token  3e95cd3edd37b166d3d4c1f92d1e77757c54af18"';
-
 export default {
     name: "MeowCreateIssue",
     data() {
@@ -51,7 +48,7 @@ export default {
         },
         newIssue: function () {
             fetch(urlAPI, {
-                headers: { headersAPI },
+                headers: headersAPI,
                 method: 'POST',
                 body: JSON.stringify({
                     title: this.issue.name,
